@@ -1,23 +1,17 @@
-import userModel from '../models/user.model.js'
+import userModel from "../models/user.model.js";
 
- const createUser = async ({
-    fullName,
+const createUser = async ({ firstName, lastName, email, password }) => {
+  if (!firstName || !email || !password) {
+    throw new Error("All fileds are required");
+  }
+
+  const user = await userModel.create({
+    firstName,
+    lastName,
     email,
-    password
+    password,
+  });
+  return user;
+};
 
-})=>{
-    if(!fullName || !email || !password){
-        throw new Error("All fileds are required")
-        
-    }
-
-    const user = await userModel.create({
-        fullName,
-        email,
-        password
-    })
-    return user
-
-}
-
-export default createUser
+export default createUser;
