@@ -2,6 +2,7 @@ import userModel from "../models/user.model.js";
 import { validationResult } from "express-validator";
 import userService from "../lib/service.js";
 import blacklistedToken from "../models/blacklisted.model.js";
+import cloudinary from "../lib/cloudinary.js";
 
 export const signup = async (req, res) => {
   const errors = validationResult(req);
@@ -59,15 +60,44 @@ export const login = async (req, res) => {
   } catch (error) {
     console.log({ message: error.message });
     res.status(500).json({ message: "internal server error" });
-    
   }
 };
 
 export const logout = async (req, res) => {
-   res.clearCookie("token");
+  res.clearCookie("token");
   const token = req.cookies.token || req.headers.authorization.split(" ")[1];
 
   await blacklistedToken.create({ token });
 
   res.status(200).json({ message: "logged out" });
 };
+
+export const updateProfile = async (req, res) => {
+  try {
+    const { profilePic } = req.body;
+    const userId = req.user._id;
+    if (!profilePic) {
+      res.status(400).json({ message: "profile pic is required" });
+    }
+    const uploadResponse= await cloudinary.uploader.upload(profilePic)
+    const updatedUser = await user.findByIdAndUpdate(userId,{profilePic:uploadResponse.secure_url},
+      {new:true}
+    )
+    res.status(200).json(updatedUser)
+  } catch (error) {
+    console.log("error in updated profile",error);
+    res.status(500).json({message:"internal serever error"})
+  }
+};
+
+
+export const checkAuth = (req,res)=>{
+  try{
+    res.status(200).json(req.user);
+
+  }catch(error){
+    console.log("error in checkAuth controller",error.message)
+    res.status(500).json({message:"internal server error"})
+  }
+
+}
