@@ -9,4 +9,5 @@ router.post('/logout',logout)
 router.post('/updateProfile',protectRoute,updateProfile)
 router.get('/check',protectRoute,checkAuth)
 
+
 export default router
