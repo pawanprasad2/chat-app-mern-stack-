@@ -5,22 +5,26 @@ import HomePage from "../src/pages/HomePage";
 import SettingPage from "../src/pages/SettingPage";
 import LoginPage from "../src/pages/LoginPage";
 import SignupPage from "../src/pages/SignupPage";
-import { UseAuthStore } from "./store/UseAuthStore";
+import {useSelector,useDispatch} from "react-redux"
+
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
+import { checkAuth } from "./redux/AuthSlice";
 function App() {
-  const { authUser, checkAuth, isCheckingAuth } = UseAuthStore();
-  useEffect(() => {
-    checkAuth();
-  }, [checkAuth]);
+ const dispatch =useDispatch();
+ const {authUser,isCheckingAuth}= useSelector((state)=>state.auth)
 
-  console.log({ authUser });
-  if (isCheckingAuth && !authUser)
+ useEffect(()=>{
+  dispatch(checkAuth())
+ },[dispatch])
+
+ if (isCheckingAuth && !authUser) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader className="size-10 animate-spin" />
       </div>
     );
+  }
   return (
     <>
       <NavBar />
