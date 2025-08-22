@@ -10,6 +10,7 @@ import {useSelector,useDispatch} from "react-redux"
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
 import { checkAuth } from "./redux/AuthSlice";
+import { Toaster } from "react-hot-toast";
 function App() {
  const dispatch =useDispatch();
  const {authUser,isCheckingAuth}= useSelector((state)=>state.auth)
@@ -35,6 +36,7 @@ function App() {
         <Route path="/login" element={ !authUser?  <LoginPage />:<Navigate to='/'/>} />
         <Route path="/signup" element={!authUser?<SignupPage />:<Navigate to='/'/>} />
       </Routes>
+      <Toaster/>
     </>
   );
 }
