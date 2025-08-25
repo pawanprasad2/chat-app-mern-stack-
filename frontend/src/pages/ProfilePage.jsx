@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Camera, Mail, User } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 
-import { updatedProfile } from "../redux/AuthSlice";
+import { updatedProfile } from "../redux/slice/AuthSlice";
 
 
 function ProfilePage() {

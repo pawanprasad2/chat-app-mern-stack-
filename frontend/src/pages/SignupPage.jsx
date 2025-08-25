@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from "react-redux";
-import { signup } from "../redux/AuthSlice";
+import { signup } from "../redux/slice/AuthSlice";
 import { useState } from "react";
 import AuthImagePattern from "../component/AuthImagePattern";
 import toast from "react-hot-toast"

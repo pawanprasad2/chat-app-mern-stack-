@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { axiosInstance } from "../lib/axios";
+import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 
 export const checkAuth = createAsyncThunk(
@@ -83,6 +83,7 @@ const authSlice = createSlice({
     isCheckingAuth: true,
     signupError: null,
      loginError: null,
+      onlineUsers: [], 
   },
   reducers: {},
   extraReducers: (builder) => {
@@ -142,5 +143,6 @@ const authSlice = createSlice({
       });
   },
 });
+ export const selectAuth = (state) => state.auth;
 
 export default authSlice.reducer;

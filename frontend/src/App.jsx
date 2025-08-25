@@ -6,10 +6,10 @@ import SettingPage from "../src/pages/SettingPage";
 import LoginPage from "../src/pages/LoginPage";
 import SignupPage from "../src/pages/SignupPage";
 import { useSelector, useDispatch } from "react-redux";
-import { selectTheme } from "./redux/ThemeSlice";
+import { selectTheme } from "./redux/slice/ThemeSlice";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
-import { checkAuth } from "./redux/AuthSlice";
+import { checkAuth } from "./redux/slice/AuthSlice";
 import { Toaster } from "react-hot-toast";
 function App() {
   const dispatch = useDispatch();

@@ -4,7 +4,7 @@ import AuthImagePattern from "../component/AuthImagePattern";
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "../redux/AuthSlice";
+import { login } from "../redux/slice/AuthSlice";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);

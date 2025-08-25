@@ -14,6 +14,7 @@ const themeSlice= createSlice({
         }
     }
 })
+
 export const {setThemeState}=themeSlice.actions
 
 export const setTheme =(theme)=> (dispatch)=>{

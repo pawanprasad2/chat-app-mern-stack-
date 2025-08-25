@@ -2,7 +2,7 @@ import React from "react";
 import { Send } from "lucide-react"
 import { THEMES } from "../constants/index";
 import { useDispatch, useSelector } from "react-redux";
-import { setTheme, selectTheme } from "../redux/ThemeSlice";
+import { setTheme, selectTheme } from "../redux/slice/ThemeSlice";
 
 const PREVIEW_MESSAGES = [
   { id: 1, content: "Hey! How's it going?", isSent: false },

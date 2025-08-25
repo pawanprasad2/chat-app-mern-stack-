@@ -1,10 +1,9 @@
-import React from "react";
-// ...existing code...
+
 import { Link } from "react-router-dom";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
-// ...existing code...
+
 import { useDispatch, useSelector } from "react-redux";
-import { logout } from "../redux/AuthSlice";
+import { logout } from "../redux/slice/AuthSlice";
 
 function NavBar() {
   const dispatch = useDispatch();
