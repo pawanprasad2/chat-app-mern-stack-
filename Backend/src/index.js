@@ -1,5 +1,5 @@
 import dotenv from "dotenv"
-import express from "express"
+import express, { urlencoded } from "express"
 import authRoutes from '../routes/auth.route.js'
 import { connectoDB } from "../lib/db.js"
 import  cookieParser  from "cookie-parser"
@@ -17,7 +17,8 @@ app.use(cors({
     credentials:true
 }))
     
-app.use(express.json())
+app.use(express.json({limit:"10mb"}))
+app.use(express.urlencoded({limit:'10mb',extended:true}))
 app.use(cookieParser())
 //routes
 app.use("/api/auth",authRoutes)
