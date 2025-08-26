@@ -1,20 +1,19 @@
-import { createAsyncThunk, createSlice, } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 
 export const getUsers = createAsyncThunk(
-    "chat/getUsers",
-    async(_,{rejectWithValue }) =>{
-        try{
-            const res =await axiosInstance.get("/message/user")
-           return res.data
-        }catch(error){
-              toast.error(error.response?.data?.message || "Failed to fetch users");
+  "chat/getUsers",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/message/user");
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch users");
       return rejectWithValue(error.response?.data);
-
-        }
     }
-)  
+  }
+);
 
 export const getMessages = createAsyncThunk(
   "chat/getMessages",
@@ -29,6 +28,21 @@ export const getMessages = createAsyncThunk(
   }
 );
 
+export const sendMessage = createAsyncThunk(
+  "chat/sendMessage",
+  async ({ userId, messageData }, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post(
+        `/message/send/${userId}`,
+        messageData
+      );
+      return res.data;
+    } catch (error) {
+      toast.error(error.response?.data?.message || " failed to send message");
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
 const chatSlice = createSlice({
   name: "chat",
   initialState: {
@@ -37,6 +51,7 @@ const chatSlice = createSlice({
     selectedUser: null,
     isUsersLoading: false,
     isMessagesLoading: false,
+    isSendingMessage: false,
   },
   reducers: {
     setSelectedUser(state, action) {
@@ -58,10 +73,10 @@ const chatSlice = createSlice({
       })
       .addCase(getUsers.rejected, (state) => {
         state.isUsersLoading = false;
-      });
+      })
 
-    // getMessages
-    builder
+      // getMessages
+
       .addCase(getMessages.pending, (state) => {
         state.isMessagesLoading = true;
       })
@@ -71,6 +86,17 @@ const chatSlice = createSlice({
       })
       .addCase(getMessages.rejected, (state) => {
         state.isMessagesLoading = false;
+      })
+
+      .addCase(sendMessage.pending, (state) => {
+        state.isSendingMessage = true;
+      })
+      .addCase(sendMessage.fulfilled, (state, action) => {
+        state.isSendingMessage = false;
+        state.messages.push(action.payload);
+      })
+      .addCase(sendMessage.rejected, (state) => {
+        state.isSendingMessage = false;
       });
   },
 });
