@@ -1,7 +1,9 @@
+// src/redux/slice/chatSlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 
+// ---------- Thunks ----------
 export const getUsers = createAsyncThunk(
   "chat/getUsers",
   async (_, { rejectWithValue }) => {
@@ -38,11 +40,37 @@ export const sendMessage = createAsyncThunk(
       );
       return res.data;
     } catch (error) {
-      toast.error(error.response?.data?.message || " failed to send message");
+      toast.error(error.response?.data?.message || "Failed to send message");
       return rejectWithValue(error.response?.data);
     }
   }
 );
+export const getUnreadCounts = createAsyncThunk(
+  "chat/getUnreadCounts",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get("/message/unread");
+      return res.data; // array of { _id: senderId, count }
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to fetch unread counts");
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+export const markAsRead = createAsyncThunk(
+  "chat/markAsRead",
+  async (userId, { rejectWithValue }) => {
+    try {
+      await axiosInstance.post(`/message/mark-read/${userId}`);
+      return userId;
+    } catch (error) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
+
+// ---------- Slice ----------
 const chatSlice = createSlice({
   name: "chat",
   initialState: {
@@ -52,6 +80,7 @@ const chatSlice = createSlice({
     isUsersLoading: false,
     isMessagesLoading: false,
     isSendingMessage: false,
+    unreadCounts: {},
   },
   reducers: {
     setSelectedUser(state, action) {
@@ -60,6 +89,15 @@ const chatSlice = createSlice({
     clearMessages(state) {
       state.messages = [];
     },
+    addMessage(state, action) {
+      const msg = action.payload;
+      state.messages.push(msg);
+      // increment unread if this user isn't currently selected
+      if (state.selectedUser?._id !== msg.senderId) {
+        state.unreadCounts[msg.senderId] = (state.unreadCounts[msg.senderId] || 0) + 1;
+      }
+    },
+    
   },
   extraReducers: (builder) => {
     // getUsers
@@ -76,7 +114,6 @@ const chatSlice = createSlice({
       })
 
       // getMessages
-
       .addCase(getMessages.pending, (state) => {
         state.isMessagesLoading = true;
       })
@@ -88,6 +125,7 @@ const chatSlice = createSlice({
         state.isMessagesLoading = false;
       })
 
+      // sendMessage
       .addCase(sendMessage.pending, (state) => {
         state.isSendingMessage = true;
       })
@@ -97,12 +135,53 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state) => {
         state.isSendingMessage = false;
+      })
+      // unread counts
+      .addCase(getUnreadCounts.fulfilled, (state, action) => {
+        state.unreadCounts = action.payload || {}; // ✅ direct object
+      })
+
+      .addCase(markAsRead.fulfilled, (state, action) => {
+        state.unreadCounts[action.payload] = 0; // ✅ reset count for that user
       });
   },
 });
 
-export const { setSelectedUser, clearMessages } = chatSlice.actions;
+// ---------- Socket Message Handling ----------
+let messageListenerAttached = false;
 
+export const subscribeToMessages = () => (dispatch, getState) => {
+  const { selectedUser } = getState().chat;
+  const { authUser } = getState().auth;
+
+  if (!selectedUser || !authUser) return;
+
+  // we already keep socket inside authSlice.js global `socket`
+  const socket = window.socket; // injected from authSlice connectSocket()
+
+  if (!socket || messageListenerAttached) return;
+
+  socket.on("newMessage", (newMessage) => {
+    const isMessageFromSelectedUser =
+      newMessage.senderId === selectedUser._id ||
+      newMessage.receiverId === selectedUser._id;
+
+    if (isMessageFromSelectedUser) {
+      dispatch(addMessage(newMessage));
+    }
+  });
+
+  messageListenerAttached = true;
+};
+
+export const unsubscribeFromMessages = () => (dispatch, getState) => {
+  const socket = window.socket;
+  if (!socket) return;
+  socket.off("newMessage");
+  messageListenerAttached = false;
+};
+
+// ---------- Exports ----------
+export const { setSelectedUser, clearMessages, addMessage } = chatSlice.actions;
 export const selectChat = (state) => state.chat;
-
 export default chatSlice.reducer;

@@ -170,6 +170,9 @@ export const connectSocket = (userId) => (dispatch) => {
     query: { userID: userId },
   });
 
+  // ✅ expose globally for chatSlice
+  window.socket = socket;
+
   socket.on("connect", () => {
     console.log("Socket connected:", socket.id);
   });
@@ -178,11 +181,11 @@ export const connectSocket = (userId) => (dispatch) => {
     dispatch(setOnlineUsers(userIds));
   });
 };
-
 export const disconnectSocket = () => (dispatch) => {
   if (socket?.connected) {
     socket.disconnect();
     dispatch(disconnectSocketState());
+    window.socket = null; // cleanup
     console.log("Socket disconnected");
   }
 };

@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUsers, setSelectedUser, selectChat } from "../redux/slice/ChatSlice";
+import {
+  getUsers,
+  setSelectedUser,
+  selectChat,
+  getUnreadCounts,
+  markAsRead,
+} from "../redux/slice/ChatSlice";
 import { selectAuth } from "../redux/slice/AuthSlice";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
@@ -8,13 +14,15 @@ import { Users } from "lucide-react";
 function Sidebar() {
   const dispatch = useDispatch();
 
-  const { users, selectedUser, isUsersLoading } = useSelector(selectChat);
+  const { users, selectedUser, isUsersLoading, unreadCounts } =
+    useSelector(selectChat);
   const { onlineUsers } = useSelector(selectAuth);
 
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
   useEffect(() => {
-    dispatch(getUsers()); 
+    dispatch(getUsers());
+    dispatch(getUnreadCounts()); // 🔴 fetch unread counts
   }, [dispatch]);
 
   const filteredUsers = showOnlineOnly
@@ -52,13 +60,16 @@ function Sidebar() {
         {filteredUsers.map((user) => (
           <button
             key={user._id}
-            onClick={() => dispatch(setSelectedUser(user))} 
+            onClick={() => {
+              dispatch(setSelectedUser(user));
+
+              dispatch(markAsRead(user._id)); // 🔴 clear unread when opening chat
+            }}
             className={`w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors
-              ${
-                selectedUser?._id === user._id
-                  ? "bg-base-300 ring-1 ring-base-300"
-                  : ""
+              ${selectedUser?._id === user._id
+                ? "bg-base-300 ring-1 ring-base-300"
+                : ""
               }`}
           >
             <div className="relative mx-auto lg:mx-0">
@@ -73,8 +84,18 @@ function Sidebar() {
             </div>
 
             {/* User info - only visible on larger screens */}
-            <div className="hidden lg:block text-left min-w-0">
-              <div className="font-medium truncate">{user.firstName} {user.lastName}</div>
+            <div className="hidden lg:block text-left min-w-0 flex-1">
+              <div className="flex justify-between items-center">
+                <div className="font-medium truncate">
+                  {user.firstName} {user.lastName}
+                </div>
+                {/* 🔴 NEW: unread badge */}
+                {unreadCounts?.[user._id] > 0 && (
+                  <span className="ml-2 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
+                    {unreadCounts[user._id]}
+                  </span>
+                )}
+              </div>
               <div className="text-sm text-zinc-400">
                 {onlineUsers.includes(user._id) ? "Online" : "Offline"}
               </div>

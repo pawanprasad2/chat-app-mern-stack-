@@ -1,12 +1,11 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getMessages, selectChat } from "../redux/slice/ChatSlice";
-import { selectAuth } from "../redux/slice/AuthSlice";
+import { getMessages, selectChat, subscribeToMessages, unsubscribeFromMessages } from"../redux/slice/ChatSlice"
+import { selectAuth } from "../redux/slice/authSlice";
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeliton";
 
-// helper for formatting time
 const formatMessageTime = (dateString) => {
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
@@ -21,10 +20,13 @@ function ChatContainer() {
   useEffect(() => {
     if (selectedUser?._id) {
       dispatch(getMessages(selectedUser._id));
+      dispatch(subscribeToMessages());
     }
+    return () => {
+      dispatch(unsubscribeFromMessages());
+    };
   }, [dispatch, selectedUser?._id]);
 
-  // auto scroll to bottom when messages update
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -51,7 +53,6 @@ function ChatContainer() {
     <div className="flex-1 flex flex-col overflow-auto">
       <ChatHeader />
 
-      {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((message) => (
           <div
@@ -60,21 +61,19 @@ function ChatContainer() {
               message.senderId === authUser?._id ? "chat-end" : "chat-start"
             }`}
           >
-            {/* Avatar */}
             <div className="chat-image avatar">
               <div className="size-10 rounded-full border">
                 <img
                   src={
                     message.senderId === authUser?._id
-                      ? authUser?.profilePic ||  "/assets/profilepic.avif"
-                      : selectedUser?.profilePic ||  "/assets/profilepic.avif"
+                      ? authUser?.profilePic || "/assets/profilepic.avif"
+                      : selectedUser?.profilePic || "/assets/profilepic.avif"
                   }
                   alt="profile pic"
                 />
               </div>
             </div>
 
-            {/* Chat bubble */}
             <div>
               <div className="chat-header mb-1">
                 <time className="text-xs opacity-50 ml-1">
@@ -94,8 +93,6 @@ function ChatContainer() {
             </div>
           </div>
         ))}
-
-        {/* Scroll to bottom */}
         <div ref={messageEndRef} />
       </div>
 
