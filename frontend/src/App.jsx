@@ -9,16 +9,27 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectTheme } from "./redux/slice/ThemeSlice";
 import { useEffect } from "react";
 import { Loader } from "lucide-react";
-import { checkAuth } from "./redux/slice/AuthSlice";
+import { checkAuth, connectSocket, disconnectSocket } from "./redux/slice/AuthSlice";
 import { Toaster } from "react-hot-toast";
+
 function App() {
   const dispatch = useDispatch();
-   const theme = useSelector(selectTheme);
+  const theme = useSelector(selectTheme);
   const { authUser, isCheckingAuth } = useSelector((state) => state.auth);
 
+  // check auth once
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
+
+  // socket connect/disconnect
+  useEffect(() => {
+    if (authUser?._id) {
+      dispatch(connectSocket(authUser._id));
+    } else {
+      dispatch(disconnectSocket());
+    }
+  }, [authUser, dispatch]);
 
   if (isCheckingAuth && !authUser) {
     return (
@@ -27,32 +38,31 @@ function App() {
       </div>
     );
   }
+
   return (
-    <>
-      <div data-theme={theme}>
-        <NavBar />
-        <Routes>
-          <Route
-            path="/"
-            element={authUser ? <HomePage /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/profile"
-            element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
-          />
-          <Route path="/settings" element={<SettingPage />} />
-          <Route
-            path="/login"
-            element={!authUser ? <LoginPage /> : <Navigate to="/" />}
-          />
-          <Route
-            path="/signup"
-            element={!authUser ? <SignupPage /> : <Navigate to="/" />}
-          />
-        </Routes>
-        <Toaster />
-      </div>
-    </>
+    <div data-theme={theme}>
+      <NavBar />
+      <Routes>
+        <Route
+          path="/"
+          element={authUser ? <HomePage /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/profile"
+          element={authUser ? <ProfilePage /> : <Navigate to="/login" />}
+        />
+        <Route path="/settings" element={<SettingPage />} />
+        <Route
+          path="/login"
+          element={!authUser ? <LoginPage /> : <Navigate to="/" />}
+        />
+        <Route
+          path="/signup"
+          element={!authUser ? <SignupPage /> : <Navigate to="/" />}
+        />
+      </Routes>
+      <Toaster />
+    </div>
   );
 }
 
