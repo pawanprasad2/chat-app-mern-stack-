@@ -4,11 +4,10 @@ import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
 import { sendMessage, selectChat } from "../redux/slice/ChatSlice";
 
-const MessageInput = () => {
+function MessageInput() {
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-
   const dispatch = useDispatch();
   const { selectedUser, isSendingMessage } = useSelector(selectChat);
 
@@ -18,11 +17,8 @@ const MessageInput = () => {
       toast.error("Please select an image file");
       return;
     }
-
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
+    reader.onloadend = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
   };
 
@@ -43,14 +39,9 @@ const MessageInput = () => {
       await dispatch(
         sendMessage({
           userId: selectedUser._id,
-          messageData: {
-            text: text.trim(),
-            image: imagePreview,
-          },
+          messageData: { text: text.trim(), image: imagePreview },
         })
-      ).unwrap(); // .unwrap() lets us catch errors
-
-      // Clear form
+      ).unwrap();
       setText("");
       setImagePreview(null);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -71,8 +62,7 @@ const MessageInput = () => {
             />
             <button
               onClick={removeImage}
-              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300
-              flex items-center justify-center"
+              className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-300 flex items-center justify-center"
               type="button"
             >
               <X className="size-3" />
@@ -80,7 +70,6 @@ const MessageInput = () => {
           </div>
         </div>
       )}
-
       <form onSubmit={handleSendMessage} className="flex items-center gap-2">
         <div className="flex-1 flex gap-2">
           <input
@@ -97,11 +86,9 @@ const MessageInput = () => {
             ref={fileInputRef}
             onChange={handleImageChange}
           />
-
           <button
             type="button"
-            className={`hidden sm:flex btn btn-circle
-                     ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
+            className={`hidden sm:flex btn btn-circle ${imagePreview ? "text-emerald-500" : "text-zinc-400"}`}
             onClick={() => fileInputRef.current?.click()}
           >
             <Image size={20} />
@@ -113,7 +100,7 @@ const MessageInput = () => {
           disabled={(!text.trim() && !imagePreview) || isSendingMessage}
         >
           {isSendingMessage ? (
-            <span className="loading loading-spinner loading-sm"></span>
+            <span className="loading loading-spinner loading-sm" />
           ) : (
             <Send size={22} />
           )}
@@ -121,6 +108,6 @@ const MessageInput = () => {
       </form>
     </div>
   );
-};
+}
 
 export default MessageInput;

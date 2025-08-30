@@ -3,8 +3,8 @@ import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = "http://localhost:3000"; // match backend port
-let socket; // keep reference outside
+const BASE_URL = "http://localhost:3000";
+let socket =null;
 
 // ---------- Thunks ----------
 export const checkAuth = createAsyncThunk(
@@ -79,6 +79,33 @@ export const updatedProfile = createAsyncThunk(
   }
 );
 
+// ---------- Socket Actions ----------
+export const connectSocket = (userId) => (dispatch) => {
+  if (!userId || socket?.connected) return;
+
+  socket = io(BASE_URL, {
+    query: { userID: userId },
+  });
+
+  window.socket = socket;
+
+  socket.on("connect", () => {
+    console.log("Socket connected:", socket.id);
+  });
+
+  socket.on("getOnlineUsers", (userIds) => {
+    dispatch(setOnlineUsers(userIds));
+  });
+};
+export const disconnectSocket = () => (dispatch) => {
+  if (socket?.connected) {
+    socket.disconnect();
+    window.socket=null
+    dispatch(setOnlineUsers([]));
+    console.log("Socket disconnected");
+  }
+};
+
 const authSlice = createSlice({
   name: "auth",
   initialState: {
@@ -87,16 +114,11 @@ const authSlice = createSlice({
     isLoggingup: false,
     isUpdateingProfile: false,
     isCheckingAuth: true,
-    signupError: null,
-    loginError: null,
     onlineUsers: [],
   },
   reducers: {
     setOnlineUsers: (state, action) => {
       state.onlineUsers = action.payload;
-    },
-    disconnectSocketState: (state) => {
-      state.onlineUsers = [];
     },
   },
   extraReducers: (builder) => {
@@ -116,36 +138,29 @@ const authSlice = createSlice({
       // signup
       .addCase(signup.pending, (state) => {
         state.isSigningup = true;
-        state.signupError = null;
       })
       .addCase(signup.fulfilled, (state, action) => {
         state.isSigningup = false;
-        state.authUser = action.payload;
+        state.authUser = action.payload.user;
       })
       .addCase(signup.rejected, (state, action) => {
         state.isSigningup = false;
-        state.signupError = action.payload;
       })
       // login
       .addCase(login.pending, (state) => {
         state.isLoggingup = true;
-        state.loginError = null;
       })
       .addCase(login.fulfilled, (state, action) => {
         state.isLoggingup = false;
-        state.authUser = action.payload;
+        state.authUser = action.payload.user;
       })
       .addCase(login.rejected, (state, action) => {
         state.isLoggingup = false;
-        state.loginError = action.payload;
       })
       // logout
       .addCase(logout.fulfilled, (state) => {
         state.authUser = null;
         state.onlineUsers = [];
-      })
-      .addCase(logout.rejected, (state, action) => {
-        state.signupError = action.payload;
       })
       // profile update
       .addCase(updatedProfile.pending, (state) => {
@@ -157,40 +172,13 @@ const authSlice = createSlice({
       })
       .addCase(updatedProfile.rejected, (state, action) => {
         state.isUpdateingProfile = false;
-        state.profileError = action.payload;
       });
   },
 });
 
-// ---------- Socket Actions ----------
-export const connectSocket = (userId) => (dispatch) => {
-  if (!userId || socket?.connected) return;
 
-  socket = io(BASE_URL, {
-    query: { userID: userId },
-  });
 
-  // ✅ expose globally for chatSlice
-  window.socket = socket;
-
-  socket.on("connect", () => {
-    console.log("Socket connected:", socket.id);
-  });
-
-  socket.on("getOnlineUsers", (userIds) => {
-    dispatch(setOnlineUsers(userIds));
-  });
-};
-export const disconnectSocket = () => (dispatch) => {
-  if (socket?.connected) {
-    socket.disconnect();
-    dispatch(disconnectSocketState());
-    window.socket = null; // cleanup
-    console.log("Socket disconnected");
-  }
-};
-
-export const { setOnlineUsers, disconnectSocketState } = authSlice.actions;
+export const { setOnlineUsers } = authSlice.actions;
 export const selectAuth = (state) => state.auth;
 
 export default authSlice.reducer;

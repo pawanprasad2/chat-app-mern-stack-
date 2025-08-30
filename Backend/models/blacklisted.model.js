@@ -9,10 +9,10 @@ token:{
 createdAt:{
     type:Date,
     default:Date.now,
-    expries:86400 //24hrs
+    expires:86400 //24hrs
 }
 })
 
-const blacklistedToken= mongoose.model("BlacklistToken",blacklistedTokenSchema)
+const blacklistedToken= mongoose.model("BlacklistedToken",blacklistedTokenSchema)
 
 export default blacklistedToken

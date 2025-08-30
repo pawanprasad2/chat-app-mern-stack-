@@ -1,10 +1,11 @@
 import { useState } from "react";
 
-import AuthImagePattern from "../component/AuthImagePattern";
+
 import { Link } from "react-router-dom";
 import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../redux/slice/AuthSlice";
+import AuthPatternBubbles from "../component/MessageBubblePattern";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +18,10 @@ const LoginPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-      if (!formData.email || !formData.password) return;
+      if (!formData.email || !formData.password){
+
+        return;
+      } 
     dispatch(login(formData))
   };
 
@@ -113,8 +117,8 @@ const LoginPage = () => {
       </div>
 
       {/* Right Side - Image/Pattern */}
-      <AuthImagePattern
-        title={"Welcome back!"}
+      <AuthPatternBubbles
+       
         subtitle={"Sign in to continue your conversations and catch up with your messages."}
       />
     </div>

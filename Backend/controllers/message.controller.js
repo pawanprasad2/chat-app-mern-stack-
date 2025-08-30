@@ -12,25 +12,25 @@ export const getUser = async (req, res) => {
       .select("-password");
     res.status(200).json(filteredUser);
   } catch (error) {
-    console.error("error in getuser".error.message);
+    console.error("error in getuser".error);
     res.status(500).json({ error: "internal server error" });
   }
 };
 
 export const getMessages = async (req, res) => {
   try {
-    const { id: userToChatId } = req.params;
-    const myId = req.user._id;
+    const { id: otherUserId } = req.params;
+    const currentUserId = req.user._id;
 
     const messages = await messageModel.find({
       $or: [
-        { senderId: myId, receiverId: userToChatId },
-        { senderId: userToChatId, receiverId: myId },
+        { senderId: currentUserId, receiverId: otherUserId },
+        { senderId: otherUserId, receiverId: currentUserId },
       ],
     });
     res.status(200).json(messages);
   } catch (error) {
-    console.log("error in get message controller", error.message);
+    console.error("error in get message controller", error);
     res.status(500).json({ error: "internal server error" });
   }
 };
@@ -41,9 +41,8 @@ export const sendMessage = async (req, res) => {
     const { id: receiverId } = req.params;
     const senderId = req.user._id;
 
-    let imageUrl;
+    let imageUrl=null;
     if (image) {
-      //upload base64  image to cloudinary
       const uploadResponse = await cloudinary.uploader.upload(image);
       imageUrl = uploadResponse.secure_url;
     }
@@ -62,12 +61,10 @@ export const sendMessage = async (req, res) => {
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.log("error in send messages controller", error.message);
+    console.error("error sending messages", error);
     res.status(500).json({ error: "internal server error" });
   }
 };
-
-// ==================== NEW: getUnreadCount ====================
 
 export const getUnreadCount = async (req, res) => {
   try {
@@ -91,20 +88,19 @@ export const getUnreadCount = async (req, res) => {
   }
 };
 
-// ==================== NEW: markAsRead ====================
 export const markAsRead = async (req, res) => {
   try {
     const { id: senderId } = req.params;
-    const userId = req.user._id;
+    const receiverId = req.user._id;
 
     await messageModel.updateMany(
-      { senderId, receiverId: userId, read: false },
+      { senderId, receiverId, read: false },
       { $set: { read: true } }
     );
 
     res.status(200).json({ message: "Messages marked as read" });
   } catch (error) {
-    console.error("error in markAsRead:", error.message);
+    console.error("error in markAsRead:", error);
     res.status(500).json({ error: "internal server error" });
   }
 };

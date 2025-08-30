@@ -70,6 +70,27 @@ export const markAsRead = createAsyncThunk(
   }
 );
 
+// Socket subscription actions
+export const subscribeToMessages = () => (dispatch, getState) => {
+  const socket = window.socket;
+  const { selectedUser } = getState().chat;
+  const {authUser} =getState().auth
+  if (!socket || !selectedUser || !authUser) return;
+
+  socket.off("newMessage")
+
+  socket.on("newMessage", (newMessage) => {
+    dispatch(addMessage(newMessage));
+  });
+};
+
+export const unsubscribeFromMessages = () => () => {
+  const socket = window.socket;
+  if (socket) {
+    socket.off("newMessage");
+  }
+};
+
 // ---------- Slice ----------
 const chatSlice = createSlice({
   name: "chat",
@@ -86,18 +107,16 @@ const chatSlice = createSlice({
     setSelectedUser(state, action) {
       state.selectedUser = action.payload;
     },
-    clearMessages(state) {
-      state.messages = [];
-    },
     addMessage(state, action) {
       const msg = action.payload;
       state.messages.push(msg);
-      // increment unread if this user isn't currently selected
-      if (state.selectedUser?._id !== msg.senderId) {
-        state.unreadCounts[msg.senderId] = (state.unreadCounts[msg.senderId] || 0) + 1;
+
+     if (state.selectedUser?._id !== msg.senderId) {
+        const senderId = msg.senderId;
+        state.unreadCounts[senderId] = (state.unreadCounts[senderId] || 0) + 1;
       }
     },
-    
+
   },
   extraReducers: (builder) => {
     // getUsers
@@ -111,6 +130,8 @@ const chatSlice = createSlice({
       })
       .addCase(getUsers.rejected, (state) => {
         state.isUsersLoading = false;
+        toast.error("Failed to fetch users");
+
       })
 
       // getMessages
@@ -123,6 +144,7 @@ const chatSlice = createSlice({
       })
       .addCase(getMessages.rejected, (state) => {
         state.isMessagesLoading = false;
+        toast.error("Failed to fetch messages");
       })
 
       // sendMessage
@@ -135,6 +157,7 @@ const chatSlice = createSlice({
       })
       .addCase(sendMessage.rejected, (state) => {
         state.isSendingMessage = false;
+        toast.error("Failed to send message");
       })
       // unread counts
       .addCase(getUnreadCounts.fulfilled, (state, action) => {
@@ -142,46 +165,16 @@ const chatSlice = createSlice({
       })
 
       .addCase(markAsRead.fulfilled, (state, action) => {
-        state.unreadCounts[action.payload] = 0; // ✅ reset count for that user
+        const userId = action.payload;
+        if (state.unreadCounts[userId]) {
+          state.unreadCounts[userId] = 0;
+        }
       });
   },
 });
 
-// ---------- Socket Message Handling ----------
-let messageListenerAttached = false;
-
-export const subscribeToMessages = () => (dispatch, getState) => {
-  const { selectedUser } = getState().chat;
-  const { authUser } = getState().auth;
-
-  if (!selectedUser || !authUser) return;
-
-  // we already keep socket inside authSlice.js global `socket`
-  const socket = window.socket; // injected from authSlice connectSocket()
-
-  if (!socket || messageListenerAttached) return;
-
-  socket.on("newMessage", (newMessage) => {
-    const isMessageFromSelectedUser =
-      newMessage.senderId === selectedUser._id ||
-      newMessage.receiverId === selectedUser._id;
-
-    if (isMessageFromSelectedUser) {
-      dispatch(addMessage(newMessage));
-    }
-  });
-
-  messageListenerAttached = true;
-};
-
-export const unsubscribeFromMessages = () => (dispatch, getState) => {
-  const socket = window.socket;
-  if (!socket) return;
-  socket.off("newMessage");
-  messageListenerAttached = false;
-};
 
 // ---------- Exports ----------
-export const { setSelectedUser, clearMessages, addMessage } = chatSlice.actions;
+export const { setSelectedUser,  addMessage } = chatSlice.actions;
 export const selectChat = (state) => state.chat;
 export default chatSlice.reducer;

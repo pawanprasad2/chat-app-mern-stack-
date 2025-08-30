@@ -1,6 +1,6 @@
 import userModel from "../models/user.model.js";
 import { validationResult } from "express-validator";
-import userService from "../lib/service.js";
+// import userService from "../lib/service.js";
 import blacklistedToken from "../models/blacklisted.model.js";
 import cloudinary from "../lib/cloudinary.js";
 
@@ -19,27 +19,24 @@ export const signup = async (req, res) => {
     if (password.length < 6) {
       return res
         .status(400)
-        .json({ message: "password must be 6 characters long" });
+        .json({ message: "password must be at least 6 characters long" });
     }
-    const hashedpassword = await userModel.hashpassword(password);
+    const hashedPassword = await userModel.hashPassword(password);
 
-    const user = await userService({
+    const user = await userModel.create({
       firstName,
       lastName,
       email,
-      password: hashedpassword,
+      password: hashedPassword,
     });
 
     const token = user.generateAuthToken();
     res.cookie("token", token, {
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict", 
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
+      httpOnly: true,
     });
     res.status(201).json({ token, user });
   } catch (error) {
-    console.log({ message: error.message });
+    console.error({ "Singup error": error });
     res.status(500).json({ message: "internal server error" });
   }
 };
@@ -64,18 +61,24 @@ export const login = async (req, res) => {
     res.cookie("token", token);
     res.status(200).json({ token, user });
   } catch (error) {
-    console.log({ message: error.message });
+    console.error({ "Login error": error });
     res.status(500).json({ message: "internal server error" });
   }
 };
 
 export const logout = async (req, res) => {
-  res.clearCookie("token");
-  const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+  try {
+    res.clearCookie("token")
+    const token= req.cookies.token|| req.headers.authorization?.split(" ")[1]
 
-  await blacklistedToken.create({ token });
-
-  res.status(200).json({ message: "logged out" });
+    if(token){
+      await blacklistedToken.create({ token });
+    }
+    res.status(200).json({ message: "logged out successfully" });
+  } catch (error) {
+    console.error("logout error",error)
+    res.status(500).json({message:"internal server error"})
+  }
 };
 
 export const updateProfile = async (req, res) => {
@@ -93,16 +96,11 @@ export const updateProfile = async (req, res) => {
     );
     res.status(200).json(updatedUser);
   } catch (error) {
-    console.log("error in updated profile", error);
+    console.error("error in updated profile", error);
     res.status(500).json({ message: "internal serever error" });
   }
 };
 
 export const checkAuth = (req, res) => {
-  try {
     res.status(200).json(req.user);
-  } catch (error) {
-    console.log("error in checkAuth controller", error.message);
-    res.status(500).json({ message: "internal server error" });
-  }
 };
