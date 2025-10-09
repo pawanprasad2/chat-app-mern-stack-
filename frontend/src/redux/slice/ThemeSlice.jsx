@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-// Get initial theme from localStorage or default to "coffee"
 const getInitialTheme = () => localStorage.getItem("chat-theme") || "coffee";
 
 const themeSlice = createSlice({

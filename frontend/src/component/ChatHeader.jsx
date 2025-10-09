@@ -9,7 +9,7 @@ function ChatHeader() {
   const { selectedUser } = useSelector(selectChat);
   const { onlineUsers } = useSelector(selectAuth);
 
-  if (!selectedUser) return null; // prevent crash if no user is selected
+  if (!selectedUser) return null; 
 
   return (
     <div className="p-2.5 border-b border-base-300">

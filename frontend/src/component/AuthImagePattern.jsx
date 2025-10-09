@@ -1,7 +1,7 @@
 import React from 'react';
 
 const AuthImagePattern = ({ title, subtitle }) => {
-  // Define the number of squares for the pattern
+
   const numberOfSquares = 9;
 
   return (
@@ -14,10 +14,6 @@ const AuthImagePattern = ({ title, subtitle }) => {
               className={`aspect-square rounded-2xl ${
                 i % 2 === 0 ? "bg-primary/30 animate-pulse" : "bg-secondary/30"
               }`}
-              // Consider adding a descriptive ARIA label if the pattern
-              // has any semantic meaning beyond decoration.
-              // For purely decorative, aria-hidden="true" on the parent div is common.
-              // If these represent something, give them a meaningful label.
             />
           ))}
         </div>

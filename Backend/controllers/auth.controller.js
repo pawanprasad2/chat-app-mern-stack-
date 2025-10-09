@@ -1,6 +1,6 @@
 import userModel from "../models/user.model.js";
 import { validationResult } from "express-validator";
-// import userService from "../lib/service.js";
+
 import blacklistedToken from "../models/blacklisted.model.js";
 import cloudinary from "../lib/cloudinary.js";
 

@@ -14,8 +14,8 @@ app.get('/',(req,res)=>{
     res.send("this is working")
 })
 app.use(cors({
-    origin:"*",
-    credentials:true
+      origin: "https://chat-app-mern-stack-chi.vercel.app", 
+    credentials: true,
 }))
     
 app.use(express.json({limit:"10mb"}))

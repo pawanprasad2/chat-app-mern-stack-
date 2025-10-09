@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { LogOut, MessageSquare, Settings, User } from "lucide-react";
 
@@ -11,7 +10,6 @@ function NavBar() {
 
   const handleLogout = async () => {
     await dispatch(logout());
-   
   };
 
   return (
@@ -44,16 +42,19 @@ function NavBar() {
               </Link>
 
               {authUser && (
-
                 <>
-                     
-                  
                   <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                     <User className="size-5" />
-                    <span className="hidden sm:inline"> {authUser.firstName}</span>
+                    <span className="hidden sm:inline">
+                      {" "}
+                      {authUser.firstName}
+                    </span>
                   </Link>
 
-                  <button className="flex gap-2 items-center" onClick={handleLogout}>
+                  <button
+                    className="flex gap-2 items-center"
+                    onClick={handleLogout}
+                  >
                     <LogOut className="size-5" />
                     <span className="hidden sm:inline">Logout</span>
                   </button>

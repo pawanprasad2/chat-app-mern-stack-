@@ -161,7 +161,7 @@ const chatSlice = createSlice({
       })
       // unread counts
       .addCase(getUnreadCounts.fulfilled, (state, action) => {
-        state.unreadCounts = action.payload || {}; // ✅ direct object
+        state.unreadCounts = action.payload || {}; 
       })
 
       .addCase(markAsRead.fulfilled, (state, action) => {

@@ -75,7 +75,7 @@ export const getUnreadCount = async (req, res) => {
       { $group: { _id: "$senderId", count: { $sum: 1 } } },
     ]);
 
-    // format result into { userId: count }
+   
     const unreadMap = {};
     counts.forEach((c) => {
       unreadMap[c._id.toString()] = c.count;
