@@ -2,7 +2,7 @@ import axios from "axios"
 
 export const axiosInstance =axios.create(
     {
-        baseURL:"http://localhost:3000/api",
+        baseURL:"https://chat-app-mern-stack-4kb1.onrender.com",
         withCredentials:true
     }
 )

@@ -3,7 +3,7 @@ import { axiosInstance } from "../../lib/axios";
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
 
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = "https://chat-app-mern-stack-4kb1.onrender.com";
 let socket =null;
 
 // ---------- Thunks ----------
