@@ -4,14 +4,14 @@ import { LogOut, MessageSquare, Settings, User } from "lucide-react";
 
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slice/AuthSlice";
-
+import { selectAuth } from "../redux/slice/AuthSlice";
 function NavBar() {
   const dispatch = useDispatch();
   const authUser = useSelector((state) => state.auth.authUser);
 
   const handleLogout = async () => {
     await dispatch(logout());
-    // optionally navigate to login: navigate("/login")
+   
   };
 
   return (
@@ -44,10 +44,13 @@ function NavBar() {
               </Link>
 
               {authUser && (
+
                 <>
+                     
+                  
                   <Link to={"/profile"} className={`btn btn-sm gap-2`}>
                     <User className="size-5" />
-                    <span className="hidden sm:inline">Profile</span>
+                    <span className="hidden sm:inline"> {authUser.firstName}</span>
                   </Link>
 
                   <button className="flex gap-2 items-center" onClick={handleLogout}>
@@ -65,4 +68,3 @@ function NavBar() {
 }
 
 export default NavBar;
-// ...existing code...

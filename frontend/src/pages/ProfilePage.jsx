@@ -4,11 +4,12 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { updatedProfile } from "../redux/slice/AuthSlice";
 
-
 function ProfilePage() {
   const dispatch = useDispatch();
   const authUser = useSelector((state) => state.auth.authUser);
-  const isUpdatingProfile = useSelector((state) => state.auth.isUpdateingProfile);
+  const isUpdatingProfile = useSelector(
+    (state) => state.auth.isUpdateingProfile
+  );
 
   const [selectedImg, setSelectedImg] = useState(null);
 
@@ -21,16 +22,14 @@ function ProfilePage() {
 
     reader.onload = async () => {
       const base64Image = reader.result;
-      // optimistically show preview
+
       setSelectedImg(base64Image);
 
       try {
-        // dispatch thunk, backend should accept { profilePic: base64Image }
         await dispatch(updatedProfile({ profilePic: base64Image })).unwrap();
-        // thunk updates authUser in store; selectedImg already shows preview
       } catch (err) {
         console.error("update profile error:", err);
-        // on error revert preview to server image (if any)
+
         setSelectedImg(null);
       }
     };
@@ -38,7 +37,7 @@ function ProfilePage() {
 
   return (
     <>
-      <div className="h-screen pt-20">
+      <div className="h-[100%]  pt-20">
         <div className="max-w-2xl mx-auto p-4 py-8">
           <div className="bg-base-300 rounded-xl p-6 space-y-8">
             <div className="text-center">
@@ -46,11 +45,14 @@ function ProfilePage() {
               <p className="mt-2">Your profile information</p>
             </div>
 
-            
             <div className="flex flex-col items-center gap-4">
               <div className="relative">
                 <img
-                  src={selectedImg || authUser?.profilePic || "/assets/profilepic.avif"}
+                  src={
+                    selectedImg ||
+                    authUser?.profilePic ||
+                    "/assets/profilepic.avif"
+                  }
                   alt="Profile"
                   className="size-32 rounded-full object-cover border-4 "
                 />
@@ -72,7 +74,9 @@ function ProfilePage() {
                 </label>
               </div>
               <p className="text-sm text-zinc-400">
-                {isUpdatingProfile ? "Uploading..." : "Click the camera icon to update your photo"}
+                {isUpdatingProfile
+                  ? "Uploading..."
+                  : "Click the camera icon to update your photo"}
               </p>
             </div>
 
@@ -82,14 +86,18 @@ function ProfilePage() {
                   <User className="w-4 h-4" />
                   FirstName
                 </div>
-                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.firstName}</p>
+                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
+                  {authUser?.firstName}
+                </p>
               </div>
               <div className="space-y-1.5">
                 <div className="text-sm text-zinc-400 flex items-center gap-2">
                   <User className="w-4 h-4" />
                   lastName
                 </div>
-                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.lastName}</p>
+                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
+                  {authUser?.lastName}
+                </p>
               </div>
 
               <div className="space-y-1.5">
@@ -97,7 +105,9 @@ function ProfilePage() {
                   <Mail className="w-4 h-4" />
                   Email Address
                 </div>
-                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">{authUser?.email}</p>
+                <p className="px-4 py-2.5 bg-base-200 rounded-lg border">
+                  {authUser?.email}
+                </p>
               </div>
             </div>
 
@@ -106,7 +116,11 @@ function ProfilePage() {
               <div className="space-y-3 text-sm">
                 <div className="flex items-center justify-between py-2 border-b border-zinc-700">
                   <span>Member Since</span>
-                  <span>{authUser?.createdAt ? authUser.createdAt.split("T")[0] : ""}</span>
+                  <span>
+                    {authUser?.createdAt
+                      ? authUser.createdAt.split("T")[0]
+                      : ""}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between py-2">
                   <span>Account Status</span>

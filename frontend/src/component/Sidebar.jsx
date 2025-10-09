@@ -13,7 +13,7 @@ function Sidebar() {
 
   useEffect(() => {
     dispatch(getUsers());
-    dispatch(getUnreadCounts()); // Fetch users and unread counts on mount
+    dispatch(getUnreadCounts()); 
   }, [dispatch]);
 
   const filteredUsers = showOnlineOnly ? users.filter((user) => onlineUsers.includes(user._id)) : users;
@@ -46,7 +46,7 @@ function Sidebar() {
             key={user._id}
             onClick={() => {
               dispatch(setSelectedUser(user));
-              dispatch(markAsRead(user._id)); // Clear unread count when selecting user
+              dispatch(markAsRead(user._id)); 
             }}
             className={`w-full p-3 flex items-center gap-3 hover:bg-base-300 transition-colors ${
               selectedUser?._id === user._id ? "bg-base-300 ring-1 ring-base-300" : ""
