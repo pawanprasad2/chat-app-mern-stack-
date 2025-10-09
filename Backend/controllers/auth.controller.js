@@ -33,6 +33,8 @@ export const signup = async (req, res) => {
     const token = user.generateAuthToken();
     res.cookie("token", token, {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
     });
     res.status(201).json({ token, user });
   } catch (error) {
@@ -58,7 +60,11 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: "invalide credentials" });
     }
     const token = user.generateAuthToken();
-    res.cookie("token", token);
+      res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.status(200).json({ token, user });
   } catch (error) {
     console.error({ "Login error": error });
@@ -68,16 +74,16 @@ export const login = async (req, res) => {
 
 export const logout = async (req, res) => {
   try {
-    res.clearCookie("token")
-    const token= req.cookies.token|| req.headers.authorization?.split(" ")[1]
+    res.clearCookie("token");
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
-    if(token){
+    if (token) {
       await blacklistedToken.create({ token });
     }
     res.status(200).json({ message: "logged out successfully" });
   } catch (error) {
-    console.error("logout error",error)
-    res.status(500).json({message:"internal server error"})
+    console.error("logout error", error);
+    res.status(500).json({ message: "internal server error" });
   }
 };
 
@@ -102,5 +108,5 @@ export const updateProfile = async (req, res) => {
 };
 
 export const checkAuth = (req, res) => {
-    res.status(200).json(req.user);
+  res.status(200).json(req.user);
 };
