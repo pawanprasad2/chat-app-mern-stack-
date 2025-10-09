@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getMessages, selectChat, subscribeToMessages, unsubscribeFromMessages } from"../redux/slice/ChatSlice"
-import { selectAuth } from "../redux/slice/authSlice";
+import { selectAuth } from "../redux/slice/AuthSlice"
 import ChatHeader from "./ChatHeader";
 import MessageInput from "./MessageInput";
 import MessageSkeleton from "./skeletons/MessageSkeliton";
